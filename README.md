@@ -9,7 +9,7 @@ application.
 ### Prerequisites
 
 - [rust and cargo](https://doc.rust-lang.org/cargo/getting-started/installation.html)
-- [protoc](https://github.com/hyperium/tonic?tab=readme-ov-file#dependencies)
+- [protoc](https://grpc.io/docs/protoc-installation/) (required for [tonic](https://github.com/hyperium/tonic?tab=readme-ov-file#dependencies))
 - OpenSSL (read further for install guide)
 - Docker (for Windows and macOS: make sure Docker Engine is active by launching Docker Desktop)
 
