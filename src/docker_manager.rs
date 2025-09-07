@@ -1,6 +1,7 @@
 //! This module is responsible for setting up and tearing down the Docker containers who run the validator nodes.
 
 use log::{debug, info};
+use std::env;
 use std::env::current_dir;
 use std::fs;
 use std::io::Read;
@@ -167,6 +168,7 @@ impl DockerNetwork {
             self.start_validator(&mut validator_container).await;
             info!("Started docker container {}", name.clone());
             validator_node_info_list.push(proto::ValidatorNodeInfo {
+                name: name.clone(),
                 peer_port: validator_container.port_peer,
                 ws_public_port: validator_container.port_ws,
                 ws_admin_port: validator_container.port_ws_admin,
@@ -202,7 +204,9 @@ impl DockerNetwork {
                 for name in names {
                     debug!("{}", name);
                     // Docker container names always start with a slash
-                    if name.starts_with("/validator_") || name.eq("/key_generator") {
+                    if name.starts_with(format!("/{}_validator_", self.config.prefix).as_str())
+                        || name.eq("/key_generator")
+                    {
                         debug!(
                             "Stopping container (auto removed): {}",
                             container.id.clone().unwrap().as_str()
@@ -318,7 +322,8 @@ impl DockerNetwork {
                     target: Some(String::from("/config")),
                     source: Some(format!(
                         "{}/network/validators/{}/config",
-                        current_dir().unwrap().to_str().unwrap(),
+                        env::var("HOST_INTERCEPTOR_PATH")
+                            .unwrap_or(current_dir().unwrap().to_str().unwrap().to_string()),
                         container.name.as_str()
                     )),
                     typ: Some(MountTypeEnum::BIND),
@@ -362,7 +367,7 @@ impl DockerNetwork {
     /// * If an error occurred while creating or executing the 'validation_create' command.
     /// * If an error occurred while removing the Docker container who generated the keys.
     async fn generate_keys(&self, n: u16) -> Vec<ValidatorKeyData> {
-        let container_name = String::from("key_generator");
+        let container_name = format!("{}_key_generator", self.config.prefix);
         let create_options = CreateContainerOptions {
             name: container_name.as_str(),
             ..Default::default()
@@ -375,9 +380,9 @@ impl DockerNetwork {
                 mounts: Some(vec![Mount {
                     target: Some(String::from("/config")),
                     source: Some(format!(
-                        "{}/network/{}/config",
-                        current_dir().unwrap().to_str().unwrap(),
-                        container_name.as_str()
+                        "{}/network/key_generator/config",
+                        env::var("HOST_INTERCEPTOR_PATH")
+                            .unwrap_or(current_dir().unwrap().to_str().unwrap().to_string()),
                     )),
                     typ: Some(MountTypeEnum::BIND),
                     ..Default::default()
@@ -489,7 +494,7 @@ impl DockerNetwork {
 
         let mut ret: Vec<(String, ValidatorKeyData)> = Vec::new();
         for (i, key) in keys.iter().enumerate() {
-            let container_name = format!("validator_{}", i);
+            let container_name = format!("{}_validator_{}", self.config.prefix, i);
             let new_config_contents = base_config_contents
                 .clone()
                 .replace("{validation_seed}", key.validation_seed.as_str());
@@ -535,6 +540,7 @@ mod integration_tests_docker {
 
     fn docker_network_setup() -> DockerNetwork {
         let config = Config {
+            prefix: "test".to_string(),
             base_port_peer: 60000,
             base_port_ws: 61000,
             base_port_ws_admin: 62000,

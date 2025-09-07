@@ -121,6 +121,7 @@ mod integration_tests_grpc {
         let mut client = setup().await;
         let validator_node_info_list = vec![
             ValidatorNodeInfo {
+                name: "Node1".to_string(),
                 peer_port: 60000,
                 ws_public_port: 61000,
                 ws_admin_port: 62000,
@@ -135,6 +136,7 @@ mod integration_tests_grpc {
                 validation_seed: "shM8uxbqE5g43G3VwKt6TM2pLvFan".to_string(),
             },
             ValidatorNodeInfo {
+                name: "Node2".to_string(),
                 peer_port: 60001,
                 ws_public_port: 61001,
                 ws_admin_port: 62001,
@@ -228,6 +230,7 @@ mod integration_tests_grpc {
     async fn validator_node_info_ok() {
         let mut client = setup().await;
         let validator_node_info_list = vec![ValidatorNodeInfo {
+            name: "Node1".to_string(),
             peer_port: 60000,
             ws_public_port: 61000,
             ws_admin_port: 62000,
@@ -255,6 +258,7 @@ mod integration_tests_grpc {
     // #[coverage(off)]  // Only available in nightly build, don't forget to uncomment #![feature(coverage_attribute)] on line 1 of main
     async fn get_config_ok() {
         let config = Config {
+            prefix: String::from("test"),
             base_port_peer: 60000,
             base_port_ws: 61000,
             base_port_ws_admin: 62000,
