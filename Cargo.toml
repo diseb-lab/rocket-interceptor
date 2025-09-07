@@ -7,7 +7,7 @@ edition = "2021"
 
 [dependencies]
 tokio = { version = "1.37.0", features = ["full"] }
-openssl = "0.10.64"
+openssl = { version="0.10.64", features = ["vendored"] }
 secp256k1 = "0.29.0"
 log = "0.4.21"
 bytes = "1.6.0"

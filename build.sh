@@ -3,4 +3,4 @@
 cargo clean
 rm rocket-interceptor
 cargo build --release
-cp ./target/release/rocket-interceptor .
+cp ./target/release/rocket-interceptor ./rocket-interceptor
